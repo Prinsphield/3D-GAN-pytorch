@@ -102,3 +102,13 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+train_log/
+model/
+log/
+img/
+*.mat
+*.jpg
+*.png
+
+

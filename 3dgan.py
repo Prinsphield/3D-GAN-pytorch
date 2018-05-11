@@ -72,14 +72,14 @@ class _3DGAN(object):
 
             self.start_step = self.restore + 1
         else:
-            self.start_step = 1
+            self.start_step = 0
 
     def save_log(self):
         scalar_info = {
             'loss_D': self.loss_D,
             'loss_G': self.loss_G,
-            'G_lr'  : self.G_lr_scheduler.get_lr(),
-            'D_lr'  : self.D_lr_scheduler.get_lr(),
+            'G_lr'  : self.G_lr_scheduler.get_lr()[0],
+            'D_lr'  : self.D_lr_scheduler.get_lr()[0],
         }
         for key, value in self.G_loss.items():
             scalar_info['G_loss/' + key] = value
@@ -92,7 +92,10 @@ class _3DGAN(object):
 
     def save_img(self, save_num=5):
         for i in range(save_num):
-            sio.savemat(os.path.join(self.config.img_dir, '{:06d}_{:02d}'.format(self.step, i)), self.fake_X[i,0])
+            mdict = {
+                'instance': self.fake_X[i,0]
+            }
+            sio.savemat(os.path.join(self.config.img_dir, '{:06d}_{:02d}.mat'.format(self.step, i)), mdict)
 
     def save_model(self):
         torch.save(self.G.state_dict(), os.path.join(self.config.model_dir, 'G_iter_{:06d}.pth'.format(self.step)))
