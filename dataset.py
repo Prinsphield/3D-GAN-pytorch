@@ -51,7 +51,7 @@ class Config:
             os.makedirs(img_dir)
         return img_dir
 
-    nchw = [16,64,64,64]
+    nchw = [32,64,64,64]
 
     G_lr = 2.5e-3
 
