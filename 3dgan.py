@@ -145,7 +145,6 @@ class _3DGAN(object):
             self.loss_G.backward()
             self.opt_G.step()
 
-            from IPython import embed; embed(); exit()
             print('step: {:06d}, loss_D: {:.6f}, loss_G: {:.6f}'.format(self.step, self.loss_D, self.loss_G))
 
             if self.step % 100 == 0:
