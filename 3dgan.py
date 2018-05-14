@@ -37,9 +37,10 @@ class _3DGAN(object):
             self.G.train()
             self.D.train()
             if self.gpu:
-                self.G.cuda(self.gpu[0])
-                self.D.cuda(self.gpu[0])
-                self.adv_criterion.cuda(self.gpu[0])
+                with torch.cuda.device(self.gpu[0]):
+                    self.G.cuda()
+                    self.D.cuda()
+                    self.adv_criterion.cuda()
 
             if len(self.gpu) > 1:
                 self.G = torch.nn.DataParallel(self.G, device_ids=self.gpu)
@@ -49,8 +50,9 @@ class _3DGAN(object):
             self.G.eval()
             self.D.eval()
             if self.gpu:
-                self.G.cuda(self.gpu[0])
-                self.D.cuda(self.gpu[0])
+                with torch.cuda.device(self.gpu[0]):
+                    self.G.cuda()
+                    self.D.cuda()
 
             if len(self.gpu) > 1:
                 self.G = torch.nn.DataParallel(self.G, device_ids=self.gpu)
@@ -72,7 +74,7 @@ class _3DGAN(object):
 
             self.start_step = self.restore + 1
         else:
-            self.start_step = 0
+            self.start_step = 1
 
     def save_log(self):
         scalar_info = {
@@ -98,8 +100,8 @@ class _3DGAN(object):
             sio.savemat(os.path.join(self.config.img_dir, '{:06d}_{:02d}.mat'.format(self.step, i)), mdict)
 
     def save_model(self):
-        torch.save(self.G.state_dict(), os.path.join(self.config.model_dir, 'G_iter_{:06d}.pth'.format(self.step)))
-        torch.save(self.D.state_dict(), os.path.join(self.config.model_dir, 'D_iter_{:06d}.pth'.format(self.step)))
+        torch.save({key: val.cpu() for key, val in self.G.state_dict().items()}, os.path.join(self.config.model_dir, 'G_iter_{:06d}.pth'.format(self.step)))
+        torch.save({key: val.cpu() for key, val in self.D.state_dict().items()}, os.path.join(self.config.model_dir, 'D_iter_{:06d}.pth'.format(self.step)))
 
     def train(self):
         self.writer = SummaryWriter(self.config.log_dir)
@@ -117,8 +119,9 @@ class _3DGAN(object):
             self.real_X = next(self.dataset.gen(True))
             self.noise = torch.rand(self.config.nchw[0], 200)
             if len(self.gpu):
-                self.real_X = self.real_X.cuda(self.gpu[0])
-                self.noise  = self.noise.cuda(self.gpu[0])
+                with torch.cuda.device(self.gpu[0]):
+                    self.real_X = self.real_X.cuda()
+                    self.noise  = self.noise.cuda()
 
             self.fake_X = self.G(self.noise)
 
@@ -145,7 +148,7 @@ class _3DGAN(object):
             self.loss_G.backward()
             self.opt_G.step()
 
-            print('step: {:06d}, loss_D: {:.6f}, loss_G: {:.6f}'.format(self.step, self.loss_D, self.loss_G))
+            print('step: {:06d}, loss_D: {:.6f}, loss_G: {:.6f}'.format(self.step, self.loss_D.data.cpu().numpy(), self.loss_G.data.cpu().numpy()))
 
             if self.step % 100 == 0:
                 self.save_log()
