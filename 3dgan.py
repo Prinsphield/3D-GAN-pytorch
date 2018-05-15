@@ -117,7 +117,7 @@ class _3DGAN(object):
             self.D_lr_scheduler.step()
 
             self.real_X = next(self.dataset.gen(True))
-            self.noise = torch.rand(self.config.nchw[0], 200)
+            self.noise = torch.randn(self.config.nchw[0], 200)
             if len(self.gpu):
                 with torch.cuda.device(self.gpu[0]):
                     self.real_X = self.real_X.cuda()

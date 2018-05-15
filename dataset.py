@@ -63,7 +63,7 @@ class Config:
 
     shuffle = True
 
-    num_workers = 5
+    num_workers = 0
 
     max_iter = 20000
 
